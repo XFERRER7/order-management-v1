@@ -6,17 +6,17 @@ interface IUser {
   name: string,
   email: string,
   password: string,
-  apartamentNumber: number,
+  apartmentNumber: number,
 }
 
-interface IApartament {
+interface IApartment {
   number: number,
 }
 
 interface IOrder {
   id: number,
   status: 'Received' | 'Delivered',
-  apartamentNumber: number,
+  apartmentNumber: number,
   items: IItem[],
   createdAt: Date,
   updatedAt: Date,
@@ -38,21 +38,29 @@ const routes = Router();
 
 
 
-//  APARTAMENT
+//  APARTMENT
 
-routes.post('/create-apartament', async (req, res) => {
+routes.get('/get-all-apartments', async (req, res) => {
 
-  const reqBody: IApartament = req.body
+  const apartments = await prisma.apartment.findMany()
+
+  return res.json(apartments)
+
+})
+
+routes.post('/create-apartment', async (req, res) => {
+
+  const reqBody: IApartment = req.body
 
   const { number } = reqBody
 
-  const apartament = await prisma.apartament.create({
+  const apartment = await prisma.apartment.create({
     data: {
       number,
     }
   })
 
-  res.json(apartament)
+  res.json(apartment)
 
 })
 
@@ -71,16 +79,16 @@ routes.post('/create-user', async (req, res) => {
 
   const reqBody: IUser = req.body
 
-  const { email, name, password, apartamentNumber } = reqBody
+  const { email, name, password, apartmentNumber } = reqBody
 
-  const apartamentNumberExists = await prisma.apartament.findUnique({
+  const apartmentNumberExists = await prisma.apartment.findUnique({
     where: {
-      number: apartamentNumber
+      number: apartmentNumber
     }
   })
 
-  if (!apartamentNumberExists) {
-    return res.status(400).json({ error: 'Apartament number does not exists' })
+  if (!apartmentNumberExists) {
+    return res.status(400).json({ error: 'Apartment number does not exists' })
   }
   else {
 
@@ -89,7 +97,7 @@ routes.post('/create-user', async (req, res) => {
         name,
         email,
         password,
-        apartamentNumber,
+        apartmentNumber,
       }
     })
 
@@ -107,25 +115,25 @@ routes.post('/create-order', async (req, res) => {
   const reqBody: IOrder = req.body
 
   const {
-    apartamentNumber,
+    apartmentNumber,
     status,
     items
   } = reqBody
 
-  const apartamentNumberExists = await prisma.apartament.findUnique({
+  const apartmentNumberExists = await prisma.apartment.findUnique({
     where: {
-      number: apartamentNumber
+      number: apartmentNumber
     }
   })
 
-  if (!apartamentNumberExists) {
-    return res.status(400).json({ error: 'Apartament number does not exists' })
+  if (!apartmentNumberExists) {
+    return res.status(400).json({ error: 'Apartment number does not exists' })
   }
   else {
     const order = await prisma.order.create({
       data: {
         status,
-        apartamentNumber,
+        apartmentNumber,
         itens: {
           create: items
         }
@@ -134,6 +142,35 @@ routes.post('/create-order', async (req, res) => {
 
     res.json(order)
   }
+
+})
+
+routes.get('/get-orders', async (req, res) => {
+
+  const orders = await prisma.order.findMany({
+    include: {
+      itens: true
+    }
+  })
+  
+  return res.json(orders)
+  
+})
+
+routes.get('/get-orders-by-apartment/:apnumber', async (req, res) => {
+
+  const { apnumber } = req.params
+
+  const order = await prisma.order.findMany({
+    where: {
+      apartmentNumber: Number(apnumber)
+    },
+    include: {
+      itens: true
+    }
+  })
+
+  return res.json(order)
 
 })
 
