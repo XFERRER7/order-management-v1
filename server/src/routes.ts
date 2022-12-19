@@ -2,8 +2,10 @@ import { Router } from "express";
 import { client } from './prisma/client'
 import { IApartment, IOrder } from "./types";
 import { CreateUserController } from './useCases/user/createUser/CreateUserController'
+import { CreateApartmentController } from './useCases/apartment/CreateApartmentController'
 
 const userController = new CreateUserController()
+const apartmentController = new CreateApartmentController()
 
 const routes = Router();
 
@@ -18,21 +20,7 @@ routes.get('/get-all-apartments', async (req, res) => {
 
 })
 
-routes.post('/create-apartment', async (req, res) => {
-
-  const reqBody: IApartment = req.body
-
-  const { number } = reqBody
-
-  const apartment = await client.apartment.create({
-    data: {
-      number,
-    }
-  })
-
-  res.json(apartment)
-
-})
+routes.post('/create-apartment', apartmentController.handle)
 
 
 //  USER

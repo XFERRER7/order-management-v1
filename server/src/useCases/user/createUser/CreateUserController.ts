@@ -20,7 +20,7 @@ class CreateUserController {
       apartmentNumber  
     })
 
-    return res.json(user)
+    res.json(user)
 
   }
 

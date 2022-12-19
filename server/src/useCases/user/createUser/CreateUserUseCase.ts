@@ -28,6 +28,8 @@ class CreateUserUseCase {
       }
     })
 
+    return user
+
   }
 
 
