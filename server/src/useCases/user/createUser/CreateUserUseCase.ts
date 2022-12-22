@@ -13,8 +13,28 @@ class CreateUserUseCase {
       }
     })
 
+    const apartmentExists = await client.apartment.findFirst({
+      where: {
+        number: apartmentNumber
+      }
+    })
+
+    const apartmentIsOccupied = await client.user.findFirst({
+      where: {
+        apartmentNumber
+      }
+    })
+
     if (userAlreadyExists) {
       throw new Error("User already exists!")
+    }
+
+    if (!apartmentExists) {
+      throw new Error("Apartment does not exist")
+    }
+
+    if(apartmentIsOccupied) {
+      throw new Error("Apartment is occupied")
     }
 
     const passwordHash = await hash(password, 8)

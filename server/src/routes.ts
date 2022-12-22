@@ -3,16 +3,21 @@ import { client } from './prisma/client'
 import { IApartment, IOrder } from "./types";
 import { CreateUserController } from './useCases/user/createUser/CreateUserController'
 import { CreateApartmentController } from './useCases/apartment/CreateApartmentController'
+import { authenticateUserController } from "./useCases/user/authenticateUser/AuthenticateUserController";
+import { ensureAuthenticated } from "./middlewares/ensureAuthenticated";
+import { RefreshTokenController } from "./useCases/refreshToken/RefreshTokenController";
 
 const userController = new CreateUserController()
 const apartmentController = new CreateApartmentController()
+const authenticateController = new authenticateUserController()
+const refreshTokenController = new RefreshTokenController()
 
 const routes = Router();
 
 
 //  APARTMENT
 
-routes.get('/get-all-apartments', async (req, res) => {
+routes.get('/get-all-apartments', ensureAuthenticated, async (req, res) => {
 
   const apartments = await client.apartment.findMany()
 
@@ -26,6 +31,8 @@ routes.post('/create-apartment', apartmentController.handle)
 //  USER
 
 routes.post('/create-user', userController.handle)
+routes.post('/login', authenticateController.handle)
+routes.post('/refresh-token', refreshTokenController.handle)
 
 routes.get("/get-users", async (req, res) => {
 

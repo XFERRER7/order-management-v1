@@ -23,6 +23,7 @@ model User {
   password  String
   apartmentNumber Int @unique
   apartment Apartment @relation(fields: [apartmentNumber], references: [number])
+  refresh_token     RefreshToken?
 } 
 
 model Order {
@@ -41,4 +42,11 @@ model Item {
   order     Order    @relation(fields: [orderId], references: [id])
   quantity  Int
   name      String
+}
+
+model RefreshToken {
+  id String @id @default(uuid())
+  expiresAt Int
+  user User @relation(fields: [userId], references: [id])
+  userId Int @unique
 }
